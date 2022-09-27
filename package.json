@@ -10,10 +10,12 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
+    "@ant-design/react-native": "^5.0.1",
     "@react-native-camera-roll/camera-roll": "^5.0.2",
     "@react-native-community/netinfo": "^9.3.1",
     "@react-navigation/native": "^6.0.10",
     "@react-navigation/stack": "^6.2.1",
+    "@reduxjs/toolkit": "^1.8.5",
     "@stream-io/flat-list-mvcp": "^0.10.2",
     "react": "18.1.0",
     "react-native": "0.70.1",
@@ -30,6 +32,8 @@
     "react-native-share": "^7.9.0",
     "react-native-svg": "^13.2.0",
     "react-native-video": "^5.2.1",
+    "react-redux": "^8.0.4",
+    "redux": "^4.2.0",
     "stream-chat-react-native": "^5.3.1"
   },
   "devDependencies": {
