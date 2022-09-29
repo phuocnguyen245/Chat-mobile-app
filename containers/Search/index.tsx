@@ -1,53 +1,73 @@
-import React, {useState} from 'react';
-import {
-  Button,
-  FlatList,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
-import {useAppContext} from '../AppContext';
-import {chatApiKey, chatUserId} from '../chatConfig';
-import {useChatClient} from '../hooks/useChatClient';
+import React, {useEffect, useState} from 'react';
+import {FlatList, StyleSheet, Text, TextInput, View} from 'react-native';
 import {StreamChat} from 'stream-chat';
+import {useAppContext} from '../AppContext';
+import {chatApiKey} from '../chatConfig';
+import {useClient} from '../hooks/useClient';
+import {useGetSearchUserMutation} from '../services/login';
 
 const chatClient = StreamChat.getInstance(chatApiKey);
 
-const Search = ({navigation}: any) => {
+const Search = (props: any) => {
+  const {username} = useClient()?.userInfo?.profile?.user;
   const {setChannel}: any = useAppContext();
-  const [text, onChangeText] = useState('');
+  const [text, setText] = useState('');
+  const [searchData, setSearchData] = useState<[]>([]);
+
+  const [getSearch] = useGetSearchUserMutation();
+
+  useEffect(() => {
+    if (text !== '') {
+      getSearch(text)
+        .unwrap()
+        .then((res: any) => {
+          const arr = res?.user?.map((u: any) => ({
+            username: u.username,
+            name: u.name,
+            image: u.image,
+          }));
+          setSearchData(arr);
+        })
+        .catch(error => console.log(error));
+    } else {
+      setSearchData([]);
+    }
+  }, [text, getSearch]);
 
   const onPressItem = async (item: any) => {
-    const id: string = `${chatUserId
+    const id: string = `${username.replace(/\s/g, '-').toLowerCase()}-${item.username
       .replace(/\s/g, '-')
-      .toLowerCase()}-${'user_test_333'.replace(/\s/g, '-').toLowerCase()}`;
+      .toLowerCase()}`;
     const newChannel = await chatClient.channel('messaging', id, {
-      name: 'USER_TEST_333',
+      name: item.name,
       image: item.image,
     });
 
     await newChannel.create();
-    await newChannel.addMembers([chatUserId]);
-    await newChannel.addMembers(['USER_TEST_333']);
+    await newChannel.addMembers([username]);
+    await newChannel.addMembers([item.username]);
     await newChannel.watch();
     await setChannel(newChannel);
-    navigation.navigate('NavigationStack', {screen: 'ChannelScreen'});
+    props?.navigation?.navigate('ChannelScreen', {name: item.name});
   };
 
   return (
     <View style={styles.container}>
       <TextInput
         style={styles.input}
-        onChangeText={onChangeText}
+        onChangeText={(value: string) => setText(value)}
         value={text}
-        onPressIn={() => navigation.navigate('ChannelScreen')}
+        onPressIn={() =>
+          props?.props?.navigation?.navigate('NavigationStack', {
+            screen: 'Search',
+          })
+        }
       />
 
       <FlatList
         style={styles.list}
-        data={useChatClient()?.chatList}
-        renderItem={({item}: {item: {name: string; channel: any}}) => (
+        data={searchData}
+        renderItem={({item}: {item: {name: string}}) => (
           <Text onPress={() => onPressItem(item)} style={styles.item}>
             {item.name}
           </Text>

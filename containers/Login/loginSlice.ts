@@ -2,24 +2,24 @@ import {createSlice} from '@reduxjs/toolkit';
 import type {PayloadAction} from '@reduxjs/toolkit';
 
 export interface CounterState {
-  token: string;
+  isLogin: boolean;
 }
 
 const initialState: CounterState = {
-  token: '',
+  isLogin: false,
 };
 
 export const loginSlice: any = createSlice({
   name: 'Login',
   initialState,
   reducers: {
-    loginSuccess: (state, action: PayloadAction<string>) => {
-      state.token = action.payload;
+    isLogin: (state, action: PayloadAction<boolean>) => {
+      state.isLogin = action.payload;
     },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const {loginSuccess} = loginSlice.actions;
+export const {isLogin} = loginSlice.actions;
 
 export default loginSlice.reducer;

@@ -1,32 +1,44 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, {useState} from 'react';
 import {Pressable, StyleSheet, Text, ToastAndroid, View} from 'react-native';
 import {TextInput} from 'react-native-gesture-handler';
+import {useDispatch} from 'react-redux';
+import {StreamChat} from 'stream-chat';
+import {chatApiKey} from '../chatConfig';
 import {usePostLoginMutation} from '../services/login';
+import {isLogin} from './loginSlice';
 
+const chatClient = StreamChat.getInstance(chatApiKey);
 const Login = ({navigation}: any) => {
   const [username, setUsername] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [onLogin] = usePostLoginMutation();
+  const dispatch = useDispatch();
   const handelLogin = () => {
-    // ToastAndroid.showWithGravityAndOffset(
-    //   'A wild toast appeared!',
-    //   ToastAndroid.LONG,
-    //   ToastAndroid.BOTTOM,
-    //   25,
-    //   50,
-    // );
-    // onLogin({username, password})
-    //   .unwrap()
-    //   .then(response => console.log(response))
-    //   .catch(e => console.log(e));
-    navigation.navigate('NavigationStack', {screen: 'ChannelList'});
+    onLogin({username, password})
+      .unwrap()
+      .then(async (res: any) => {
+        const {accessToken, ...rest} = res;
+        await chatClient.connectUser({id: rest.user.username, name: rest.user.name}, accessToken);
+        await AsyncStorage.setItem('USER_TOKEN', accessToken);
+        await AsyncStorage.setItem('USER_INFO', JSON.stringify(res));
+        dispatch(isLogin(true));
+        ToastAndroid.showWithGravityAndOffset('Login Success', ToastAndroid.SHORT, ToastAndroid.TOP, 25, 50);
+        setTimeout(() => {
+          navigation.navigate('NavigationStack', {screen: 'ChannelList'});
+        }, 1000);
+      })
+      .catch((error: any) => {
+        ToastAndroid.showWithGravityAndOffset(error?.data?.message, ToastAndroid.SHORT, ToastAndroid.TOP, 25, 50);
+      });
   };
+
   return (
     <View style={styles.container}>
       <View style={styles.inputView}>
         <TextInput
           style={styles.TextInput}
-          placeholder="Email."
+          placeholder="Username"
           placeholderTextColor="#003f5c"
           onChangeText={e => setUsername(e)}
         />
@@ -41,6 +53,10 @@ const Login = ({navigation}: any) => {
           onChangeText={p => setPassword(p)}
         />
       </View>
+      <Pressable style={{width: '70%'}} onPress={() => navigation.navigate('AppNavigationStack', {screen: 'Register'})}>
+        <Text style={{textAlign: 'right'}}>Register now</Text>
+      </Pressable>
+
       <Pressable style={styles.loginBtn} onPress={() => handelLogin()}>
         <Text style={{color: '#fff'}}>LOGIN</Text>
       </Pressable>

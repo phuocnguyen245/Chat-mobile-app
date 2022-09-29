@@ -12,7 +12,7 @@ export const getToken = async () => {
 };
 
 export const baseQueryWithToken = fetchBaseQuery({
-  baseUrl: 'http://localhost:5000/api/',
+  baseUrl: 'https://reactnativechatapp.herokuapp.com/api/',
   prepareHeaders: headers => {
     const token = getToken();
     if (token) {
@@ -23,5 +23,5 @@ export const baseQueryWithToken = fetchBaseQuery({
 });
 
 export const baseQueryWithoutToken = fetchBaseQuery({
-  baseUrl: 'http://localhost:5000/api/login',
+  baseUrl: 'https://reactnativechatapp.herokuapp.com/api/',
 });

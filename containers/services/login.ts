@@ -13,9 +13,26 @@ export const loginAPI = createApi({
         method: 'POST',
       }),
     }),
+    postRegister: builder.mutation<any, any>({
+      query: (body: any) => ({
+        url: 'register',
+        body,
+        method: 'POST',
+      }),
+    }),
+    getSearchUser: builder.mutation<any, any>({
+      query: (searchText: any) => ({
+        url: `user/search?q=${searchText}`,
+        method: 'GET',
+      }),
+    }),
   }),
 });
 
 // Export hooks for usage in functional components, which are
 // auto-generated based on the defined endpoints
-export const {usePostLoginMutation} = loginAPI;
+export const {
+  usePostLoginMutation,
+  usePostRegisterMutation,
+  useGetSearchUserMutation,
+} = loginAPI;
